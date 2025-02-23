@@ -1,13 +1,14 @@
 package org.sanketika.springbootproject1.controller;
 
+import org.hibernate.exception.JDBCConnectionException;
 import org.springframework.dao.DataAccessResourceFailureException;
+import org.springframework.data.crossstore.ChangeSetPersister;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.CannotCreateTransactionException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.servlet.NoHandlerFoundException;
 
 import java.sql.SQLNonTransientConnectionException;
 import java.time.LocalDateTime;
@@ -20,29 +21,33 @@ public class ErrorHandling {
     Map<String, Object> response = new HashMap<>();
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<Map<String, Object>> handlenotfoundexception(MethodArgumentNotValidException m)  {
-        response.put("Stuats", HttpStatus.BAD_REQUEST.value());
+    public ResponseEntity<Map<String, Object>> handleNotfoundexception(MethodArgumentNotValidException m)  {
+        response.put("Status", HttpStatus.BAD_REQUEST.toString());
         response.put("message", "the requested parameter is not exits");
-        return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+        response.put("timestamp",LocalDateTime.now());
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
     }
 
-    @ExceptionHandler(NoHandlerFoundException.class)
-    public ResponseEntity<Map<String, Object>> notHandlerException(NoHandlerFoundException n) {
-        response.put("status", HttpStatus.NOT_FOUND.value());
+    @ExceptionHandler({ChangeSetPersister.NotFoundException.class, NullPointerException.class }) //this is used in post method
+    public ResponseEntity<Map<String, Object>> notHandlerException(NullPointerException n) {
+        response.put("status", HttpStatus.NOT_FOUND.toString());
         response.put("message", "requested dataset id is not found");
-        return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
+        response.put("timestamp",LocalDateTime.now());
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
     }
 
-    @ExceptionHandler({SQLNonTransientConnectionException.class, DataAccessResourceFailureException.class,CannotCreateTransactionException.class})
-    public ResponseEntity<Map<String, Object>> handledbException(SQLNonTransientConnectionException s) {
-        response.put("Status", HttpStatus.INTERNAL_SERVER_ERROR.value());
-        response.put("message", "database connect id down");
-        return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+    @ExceptionHandler({JDBCConnectionException.class,SQLNonTransientConnectionException.class, DataAccessResourceFailureException.class,CannotCreateTransactionException.class})
+    public ResponseEntity<Map<String, Object>> handleDbException(Exception e) {
+        response.put("Status", HttpStatus.SERVICE_UNAVAILABLE.toString());
+        response.put("message", "database connection is down");
+        response.put("timestamp",LocalDateTime.now());
+        return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body(response);
     }
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<Map<String,Object>> handlegenericerror(Exception e){
-        response.put("status",HttpStatus.INTERNAL_SERVER_ERROR.value());
-        response.put("message","An unexcepted error occur");
-        return new ResponseEntity<>(response ,HttpStatus.INTERNAL_SERVER_ERROR);
+    public ResponseEntity<Map<String,Object>> handleGenericError(Exception e){
+        response.put("status",HttpStatus.INTERNAL_SERVER_ERROR.toString());
+        response.put("message","An unexcepted error occured");
+        response.put("timestamp",LocalDateTime.now());
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
     }
 }

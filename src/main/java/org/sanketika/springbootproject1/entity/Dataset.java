@@ -21,8 +21,9 @@ public class Dataset {
     @JdbcTypeCode(SqlTypes.JSON)
     @Column(columnDefinition = "Jsonb")
     private Map<String,Object> routerConfig;
+    @Column(name="status",nullable = false)
     @Enumerated(EnumType.STRING)
-    private String Status;
+    private Status status;
     @Column(name="createdBy",nullable = false)
     private String createdBy;
     @Column(name = "updatedBy",nullable = false)
@@ -34,11 +35,11 @@ public class Dataset {
     @UpdateTimestamp
     private LocalDateTime updatedByDate;
 
-    public Dataset(String id, Map<String, Object> dataSchema, Map<String, Object> routerConfig,String status, String createdBy, String updatedBy, LocalDateTime createdByDate, LocalDateTime updatedByDate) {
+    public Dataset(String id, Map<String, Object> dataSchema, Map<String, Object> routerConfig,Status status, String createdBy, String updatedBy, LocalDateTime createdByDate, LocalDateTime updatedByDate) {
         this.id = id;
         this.dataSchema = dataSchema;
         this.routerConfig = routerConfig;
-        this.Status = status;
+        this.status = status;
         this.createdBy = createdBy;
         this.updatedBy = updatedBy;
         this.createdByDate = createdByDate;
@@ -73,12 +74,12 @@ public class Dataset {
         this.routerConfig = routerConfig;
     }
 
-    public String getStatus() {
-        return Status;
+    public Status getStatus() {
+        return status;
     }
 
-    public void setStatus(String status) {
-        Status = status;
+    public void setStatus(Status status) {
+        this.status = status;
     }
 
     public String getCreatedBy() {
