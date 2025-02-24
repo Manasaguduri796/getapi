@@ -48,8 +48,8 @@ public class DatasetService {
     }
 
     public ResponseEntity<?> getByStatus(String status) {
-        if (status.trim().isEmpty()||status == null) {
-            return ResponseEntity.badRequest().body(DatasetResponse.createResponse("failure",HttpStatus.BAD_REQUEST,"status paramter is required",null));
+        if (status == null||status.trim().isEmpty()) {
+            return ResponseEntity.badRequest().body(DatasetResponse.createResponse("failure",HttpStatus.BAD_REQUEST,"status parameter is required",null));
         }
 
         try {

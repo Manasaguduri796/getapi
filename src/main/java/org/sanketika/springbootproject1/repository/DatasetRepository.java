@@ -12,7 +12,5 @@ import java.util.List;
 
 @Repository
 public interface DatasetRepository extends JpaRepository<Dataset,String> {
-
-  @Query("SELECT d FROM Dataset d WHERE d.status = status")
-  List<Dataset> findByStatus(@Param("status") Status status);
+  List<Dataset> findByStatus(Status status);
 }

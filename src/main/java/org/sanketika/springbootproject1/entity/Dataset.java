@@ -11,7 +11,7 @@ import java.time.LocalDateTime;
 import java.util.Map;
 
 @Entity
-@Table(name="table_1")
+@Table(name="table_2")
 public class Dataset {
     @Id
     private String id;
