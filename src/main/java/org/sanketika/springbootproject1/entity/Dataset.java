@@ -1,6 +1,5 @@
 package org.sanketika.springbootproject1.entity;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import jakarta.persistence.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.JdbcTypeCode;
@@ -16,10 +15,10 @@ public class Dataset {
     @Id
     private String id;
     @JdbcTypeCode(SqlTypes.JSON)
-    @Column(columnDefinition = "jsonb")
+    @Column(columnDefinition = "Jsonb")
     private Map<String,Object> dataSchema;
     @JdbcTypeCode(SqlTypes.JSON)
-    @Column(columnDefinition = "Jsonb")
+    @Column(name="router_config",columnDefinition = "Jsonb")
     private Map<String,Object> routerConfig;
     @Column(name="status",nullable = false)
     @Enumerated(EnumType.STRING)
@@ -48,7 +47,6 @@ public class Dataset {
     public Dataset(){
 
     }
-
 
     public String getId() {
         return id;

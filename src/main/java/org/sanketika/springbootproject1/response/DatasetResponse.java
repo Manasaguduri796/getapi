@@ -12,7 +12,7 @@ public class DatasetResponse {
 
     public static Map<String, Object> createResponse(String status, HttpStatus responseCode, String errorMessage, Object result) {
        Map<String,Object> response=new LinkedHashMap<>();
-       response.put("id","api.read");
+       response.put("id","api");
        response.put("ver","1.0");
        response.put("ts", Instant.now().toString());
 
@@ -21,6 +21,7 @@ public class DatasetResponse {
        param.put("resmsgid", UUID.randomUUID().toString());
        param.put("status",status);
        param.put("error_msg",errorMessage);
+
 
        response.put("params",param);
        response.put("responseCode",responseCode.value());

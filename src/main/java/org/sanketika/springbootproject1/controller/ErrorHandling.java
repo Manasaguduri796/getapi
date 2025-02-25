@@ -1,6 +1,7 @@
 package org.sanketika.springbootproject1.controller;
 
 import org.hibernate.exception.JDBCConnectionException;
+import org.sanketika.springbootproject1.response.DatasetResponse;
 import org.springframework.dao.DataAccessResourceFailureException;
 import org.springframework.data.crossstore.ChangeSetPersister;
 import org.springframework.http.HttpStatus;
@@ -38,10 +39,10 @@ public class ErrorHandling {
 
     @ExceptionHandler({JDBCConnectionException.class,SQLNonTransientConnectionException.class, DataAccessResourceFailureException.class,CannotCreateTransactionException.class})
     public ResponseEntity<Map<String, Object>> handleDbException(Exception e) {
-        response.put("Status", HttpStatus.SERVICE_UNAVAILABLE.toString());
-        response.put("message", "database connection is down");
-        response.put("timestamp",LocalDateTime.now());
-        return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body(response);
+//        response.put("Status", HttpStatus.INTERNAL_SERVER_ERROR.toString());
+//        response.put("message", "database connection is down");
+//        response.put("timestamp",LocalDateTime.now());
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(DatasetResponse.createResponse("Failure",HttpStatus.INTERNAL_SERVER_ERROR,"database connection is down",null));
     }
     @ExceptionHandler(Exception.class)
     public ResponseEntity<Map<String,Object>> handleGenericError(Exception e){
