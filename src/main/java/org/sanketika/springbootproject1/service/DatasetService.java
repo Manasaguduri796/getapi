@@ -7,6 +7,7 @@ import org.sanketika.springbootproject1.entity.Status;
 import org.sanketika.springbootproject1.repository.DatasetRepository;
 import org.sanketika.springbootproject1.response.DatasetResponse;
 import org.sanketika.springbootproject1.response.ResponsePost;
+import org.sanketika.springbootproject1.response.SimpleResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.http.HttpStatus;
@@ -20,6 +21,7 @@ import java.util.*;
 public class DatasetService {
     @Autowired
     private final DatasetRepository datasetRepository;
+    private Object SimpleResponse;
 
 
     public DatasetService(DatasetRepository datasetRepository) {
@@ -93,8 +95,13 @@ public class DatasetService {
             dataset.setCreatedByDate(LocalDateTime.now());
             dataset.setUpdatedByDate(LocalDateTime.now());
             Dataset savedDataset = datasetRepository.save(dataset);
-            return ResponseEntity.status(HttpStatus.CREATED).body(ResponsePost.createResponses(
-                    "Success", HttpStatus.CREATED, "Dataset saved successfully with ID: " + savedDataset.getId(), savedDataset));
+
+            SimpleResponse simpleResponse = new SimpleResponse(
+                    savedDataset.getId(),
+                    "Dataset saved successfully with ID: " + savedDataset.getId()
+            );
+            return ResponseEntity.status(HttpStatus.CREATED).body(DatasetResponse.createResponse(
+                    "Success", HttpStatus.CREATED, "null",simpleResponse));
 
 
         } catch(DuplicateKeyException d){
@@ -138,7 +145,11 @@ public class DatasetService {
             }
 
             Dataset updateDatasets = datasetRepository.save(existingDataset);
-            return ResponseEntity.ok().body(ResponsePost.createResponses("Success", HttpStatus.OK, "Dataset with id is updated sucessfully", updateDatasets));
+            SimpleResponse simpleResponse = new SimpleResponse(
+                    existingDataset.getId(),
+                    "Dataset updated successfully with ID: " + existingDataset.getId()
+            );
+            return ResponseEntity.ok().body(DatasetResponse.createResponse("Success", HttpStatus.OK, "null", simpleResponse));
 
         }catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(DatasetResponse.createResponse("fail", HttpStatus.INTERNAL_SERVER_ERROR, "An error occured", null));
