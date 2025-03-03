@@ -15,7 +15,7 @@ services:
       - postgres_data:/var/lib/postgresql/data
 
   app:
-    image: my-springboot-app
+    image: manasaguduri796/springbootproject1:latest
     container_name: springboot_app
     depends_on:
       - database
