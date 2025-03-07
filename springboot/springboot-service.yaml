@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: springboot-service
+spec:
+  type: ClusterIP
+  selector:
+    app: springboot-app
+  ports:
+    - protocol: TCP
+      port: 8083 #port number exposes internally in the cluster
+      targetPort: 8083 #port the container on listening
+      #nodePort: 30008 #access service via external port number

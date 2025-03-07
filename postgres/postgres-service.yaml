@@ -1,0 +1,11 @@
+apiVersion: v1 # specifies the version of kube api to use for given resource
+kind: Service #its a type of resource  here we are use service resource
+metadata:
+  name: postgres #forward the request to pod with label of this value
+spec:
+  ports:
+    - protocol: TCP
+      port: 5432
+      targetPort: 5432
+  selector:
+    app: postgres

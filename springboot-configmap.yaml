@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: spring-config
+  namespace: springboot-app
+data:
+  SPRING_DATASOURCE_URL: jdbc:postgresql://postgres.postgres-db:5432/datasetapis
+  SPRING_DATASOURCE_USERNAME: postgres
+  SPRING_DATASOURCE_PASSWORD: password
