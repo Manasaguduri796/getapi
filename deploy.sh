@@ -1,11 +1,10 @@
 echo "create namespaces"
 kubectl create namespace postgres-db
 kubectl create namespace springboot-app
-kubectl create namespace client
 echo "configmaps"
 
-kubectl apply -f sconfigmap.yaml -n springboot-app
-kubectl apply -f configmap.yaml -n postgres-db
+kubectl apply -f config.yaml -n springboot-app
+kubectl apply -f config.yaml -n postgres-db
 
 echo "deploy postgres deployment"
 kubectl apply -f postgres/deployment.yaml -n postgres-db

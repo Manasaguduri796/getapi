@@ -1,5 +1,3 @@
-
-
 services:
   database: # 1 container specifies services
     image: postgres:17 # it is postgres images
