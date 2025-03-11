@@ -4,17 +4,17 @@ services:
   database: # 1 container specifies services
     image: postgres:17 # it is postgres images
     container_name: postgres_db # here we are give container name
-    restart: always
+    restart: always #Configures the container to always restart if it stops or crashes
     environment: #setting environment variables  for postgres database
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: password
       POSTGRES_DB: datasetapis
     ports:
-      - "5433:5433" #port forwarding for database
+      - "5433:5433" #port forwarding for databaseThis allows external applications to connect to PostgreSQL on the specified por
     networks:
       - springboot-networks #networks by this both container will interact with each other
     volumes:
-      - postgres_data:/var/lib/postgresql/data #volume is a backup process where we can restore our data
+      - postgres_data:/var/lib/postgresql/data #volume is a backup process where we can restore our data Mounts a named volume called postgres_data to the directory data inside the container.
 
 
   app: #services
