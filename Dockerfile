@@ -1,17 +1,31 @@
 FROM openjdk:21-jdk-slim
 
-RUN apt-get update && apt-get install maven -y
-
 WORKDIR /app
 
-COPY  . /app/
+COPY . /app/
 
-RUN mvn clean install -DskipTests &&  mvn clean compile -DskipTests && mvn clean package -DskipTests
+RUN apt-get update && apt-get install maven -y
+
+RUN mvn clean compile -DskipTests
+
+RUN mvn clean package -DskipTests
 
 EXPOSE 8083
 
+ENTRYPOINT ["java","-jar","/app/target/springbootproject1-0.0.1-SNAPSHOT.jar"]
 
-ENTRYPOINT ["java", "-jar", "/app/target/springbootproject1.jar"]
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

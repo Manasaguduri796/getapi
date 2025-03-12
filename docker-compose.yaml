@@ -16,7 +16,7 @@ services:
 
 
   app: #services
-    image: manasaguduri796/springbootproject1:latest
+    image: manasaguduri796/springbootapis:latest
     container_name: springboot_app
     depends_on:
       - database
