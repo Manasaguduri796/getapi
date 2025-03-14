@@ -13,8 +13,8 @@ jobs:
        - name: login into dockerhub
          uses: docker/login-action@v3
          with:
-           username: ${{vars.DOCKER_USERNAME}}
-           password: ${{vars.DOCKER_PASSWORD}}
+           username: ${{ vars.DOCKER_USERNAME}}
+           password: ${{ vars.DOCKER_PASSWORD}}
            
        - name: build docker image
          run: |
