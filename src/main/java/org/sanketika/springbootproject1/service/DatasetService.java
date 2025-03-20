@@ -13,11 +13,13 @@ import org.springframework.dao.DuplicateKeyException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.*;
 
 @Service
+
 public class DatasetService {
     @Autowired
     private final DatasetRepository datasetRepository;
@@ -26,10 +28,9 @@ public class DatasetService {
 
     public DatasetService(DatasetRepository datasetRepository) {
         this.datasetRepository = datasetRepository;
-
-
     }
-//GETALL
+
+    //GETALL
     public ResponseEntity<?> getAllDataset() {
 
         List<Dataset> datasetList = datasetRepository.findAll();
@@ -38,7 +39,8 @@ public class DatasetService {
         }
         return (ResponseEntity.ok(DatasetResponse.createResponse("Success", HttpStatus.OK, null, datasetList)));
     }
-//GETBYID
+
+    //GETBYID
     public ResponseEntity<?> getById(String id) {
 
         Optional<Dataset> dataset = datasetRepository.findById(id);
@@ -51,6 +53,7 @@ public class DatasetService {
 
     }
 //GETBYSTATUS
+
     public ResponseEntity<?> getByStatus(String status) {
         if (status == null || status.trim().isEmpty()) {
             return ResponseEntity.badRequest().body(DatasetResponse.createResponse("failure", HttpStatus.BAD_REQUEST, "status parameter is required", null));
@@ -67,7 +70,9 @@ public class DatasetService {
         }
 
     }
-//CREATE
+
+    //CREATE
+    @Transactional
     public ResponseEntity<?> createDataset(String datasetJson) {
 
         try {
@@ -86,7 +91,7 @@ public class DatasetService {
                 return ResponseEntity.badRequest().body(DatasetResponse.createResponse(
                         "Fail", HttpStatus.BAD_REQUEST, "Router config is required", null));
             }
-            if(datasetRepository.existsById(dataset.getId())){
+            if (datasetRepository.existsById(dataset.getId())) {
                 throw new DuplicateKeyException(dataset.getId());
             }
             dataset.setStatus(Status.valueOf("DRAFT"));
@@ -101,19 +106,19 @@ public class DatasetService {
                     "Dataset saved successfully with ID: " + savedDataset.getId()
             );
             return ResponseEntity.status(HttpStatus.CREATED).body(DatasetResponse.createResponse(
-                    "Success", HttpStatus.CREATED, "null",simpleResponse));
+                    "Success", HttpStatus.CREATED, "null", simpleResponse));
 
 
-        } catch(DuplicateKeyException d){
-                return ResponseEntity.status(HttpStatus.CONFLICT).body(DatasetResponse.createResponse("Fail", HttpStatus.CONFLICT,  "requested id is already existed",null));
+        } catch (DuplicateKeyException d) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(DatasetResponse.createResponse("Fail", HttpStatus.CONFLICT, "requested id is already existed", null));
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(DatasetResponse.createResponse(
                     "Fail", HttpStatus.INTERNAL_SERVER_ERROR, "Error processing request: ", null));
         }
     }
 
-//UPDATE
-    public ResponseEntity<?> updateDatasetById(String id,Dataset updateDataset) {
+    //UPDATE
+    public ResponseEntity<?> updateDatasetById(String id, Dataset updateDataset) {
         try {
             Optional<Dataset> datasetExi = datasetRepository.findById(id);
             if (!datasetExi.isPresent()) {
@@ -122,25 +127,25 @@ public class DatasetService {
 
             Dataset existingDataset = datasetExi.get();
 
-            if (updateDataset.getDataSchema()== null || existingDataset.getDataSchema().values().isEmpty()) {
+            if (updateDataset.getDataSchema() == null || existingDataset.getDataSchema().values().isEmpty()) {
                 return ResponseEntity.badRequest().body(DatasetResponse.createResponse("fail", HttpStatus.BAD_REQUEST, "dataSchema is required", null));
             }
             if (updateDataset.getRouterConfig() == null || existingDataset.getRouterConfig().values().isEmpty()) {
                 return ResponseEntity.badRequest().body(DatasetResponse.createResponse("fail", HttpStatus.BAD_REQUEST, "routerConfig is required", null));
             }
 
-          //  existingDataset.setStatus(Status.valueOf("DRAFT"));
+            //  existingDataset.setStatus(Status.valueOf("DRAFT"));
             existingDataset.setCreatedBy("SYSTEM");
             existingDataset.setUpdatedBy("SYSTEM");
             existingDataset.setCreatedByDate(LocalDateTime.now());
 
-            if(updateDataset.getDataSchema()!=null){
+            if (updateDataset.getDataSchema() != null) {
                 existingDataset.setDataSchema(updateDataset.getDataSchema());
             }
-            if(updateDataset.getRouterConfig()!=null){
+            if (updateDataset.getRouterConfig() != null) {
                 existingDataset.setRouterConfig(updateDataset.getRouterConfig());
             }
-            if(updateDataset.getStatus()!=null){
+            if (updateDataset.getStatus() != null) {
                 existingDataset.setStatus(updateDataset.getStatus());
             }
 
@@ -151,11 +156,12 @@ public class DatasetService {
             );
             return ResponseEntity.ok().body(DatasetResponse.createResponse("Success", HttpStatus.OK, "null", simpleResponse));
 
-        }catch (Exception e) {
+        } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(DatasetResponse.createResponse("fail", HttpStatus.INTERNAL_SERVER_ERROR, "An error occured", null));
         }
     }
-//DELETEBYID
+
+    //DELETEBYID
     public ResponseEntity<?> deletedDatasetById(String id) {
         Optional<Dataset> datasetOpt = datasetRepository.findById(id);
         if (!datasetOpt.isPresent()) {
@@ -166,6 +172,7 @@ public class DatasetService {
         return ResponseEntity.ok(ResponsePost.createResponses("Success", HttpStatus.OK, "Dataset id is deleted successfully", null));
 
     }
+
 }
 
 
