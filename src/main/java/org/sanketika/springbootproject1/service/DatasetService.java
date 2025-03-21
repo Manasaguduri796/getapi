@@ -31,7 +31,7 @@ public class DatasetService {
     }
 
     //GETALL
-    public ResponseEntity<?> getAllDataset() {
+    public ResponseEntity<?> getDatasetAll() {
 
         List<Dataset> datasetList = datasetRepository.findAll();
         if (datasetList.isEmpty()) {
@@ -46,7 +46,8 @@ public class DatasetService {
         Optional<Dataset> dataset = datasetRepository.findById(id);
         if (dataset.isPresent()) {
             return (ResponseEntity.ok(DatasetResponse.createResponse("Success", HttpStatus.OK, null, datasetRepository.findById(id))));
-        } else {
+        }
+        else {
             return (ResponseEntity.status(HttpStatus.NOT_FOUND).body(DatasetResponse.createResponse("Failure", HttpStatus.NOT_FOUND, "Requested dataset id is not found", null)));
         }
 
@@ -92,7 +93,7 @@ public class DatasetService {
                         "Fail", HttpStatus.BAD_REQUEST, "Router config is required", null));
             }
             if (datasetRepository.existsById(dataset.getId())) {
-                throw new DuplicateKeyException(dataset.getId());
+               return ResponseEntity.status(HttpStatus.CONFLICT).body(DatasetResponse.createResponse("Fail",HttpStatus.CONFLICT,"Requested id is already existed",null));
             }
             dataset.setStatus(Status.valueOf("DRAFT"));
             dataset.setCreatedBy("SYSTEM");
@@ -109,11 +110,9 @@ public class DatasetService {
                     "Success", HttpStatus.CREATED, "null", simpleResponse));
 
 
-        } catch (DuplicateKeyException d) {
-            return ResponseEntity.status(HttpStatus.CONFLICT).body(DatasetResponse.createResponse("Fail", HttpStatus.CONFLICT, "requested id is already existed", null));
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(DatasetResponse.createResponse(
-                    "Fail", HttpStatus.INTERNAL_SERVER_ERROR, "Error processing request: ", null));
+                    "Fail", HttpStatus.INTERNAL_SERVER_ERROR, "Error processing request ", null));
         }
     }
 
@@ -162,7 +161,7 @@ public class DatasetService {
     }
 
     //DELETEBYID
-    public ResponseEntity<?> deletedDatasetById(String id) {
+    public ResponseEntity<?> deleteDatasetById(String id) {
         Optional<Dataset> datasetOpt = datasetRepository.findById(id);
         if (!datasetOpt.isPresent()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(

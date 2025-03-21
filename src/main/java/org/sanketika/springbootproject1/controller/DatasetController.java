@@ -25,8 +25,8 @@ public class DatasetController {
     }
 
     @GetMapping("/getAll")
-    public ResponseEntity<?> getAllDataset() {
-        return datasetService.getAllDataset();
+    public ResponseEntity<?> getDatasetAll() {
+        return datasetService.getDatasetAll();
     }
 
 
@@ -37,7 +37,7 @@ public class DatasetController {
 
 
     @GetMapping("/getByStatus")
-    public ResponseEntity<?> getByDatasetStatus(@RequestParam(name = "status", required = false) String status) {
+    public ResponseEntity<?> getByDatasetByStatus(@RequestParam(name = "status", required = false) String status) {
         return datasetService.getByStatus(status);
     }
 
@@ -51,8 +51,8 @@ public class DatasetController {
    return datasetService.updateDatasetById(id,updateDataset);
   }
     @DeleteMapping("/delete/{id}")
-    public ResponseEntity<?> deletedDatasetById(@PathVariable String id) {
-        return datasetService.deletedDatasetById(id);
+    public ResponseEntity<?> deleteDatasetById(@PathVariable String id) {
+        return datasetService.deleteDatasetById(id);
     }
 
 }
