@@ -1,6 +1,7 @@
 package org.sanketika.springbootproject1.service;
 
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.sanketika.springbootproject1.entity.Dataset;
 import org.sanketika.springbootproject1.entity.Status;
@@ -9,7 +10,6 @@ import org.sanketika.springbootproject1.response.DatasetResponse;
 import org.sanketika.springbootproject1.response.ResponsePost;
 import org.sanketika.springbootproject1.response.SimpleResponse;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.DuplicateKeyException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -24,6 +24,9 @@ public class DatasetService {
     @Autowired
     private final DatasetRepository datasetRepository;
     private Object SimpleResponse;
+    @Autowired
+    private ObjectMapper objectMapper;
+    private Dataset updatedDataset;
 
 
     public DatasetService(DatasetRepository datasetRepository) {
@@ -72,91 +75,64 @@ public class DatasetService {
 
     }
 
-    //CREATE
+    //Create
     @Transactional
     public ResponseEntity<?> createDataset(String datasetJson) {
-
         try {
-            ObjectMapper mapper = new ObjectMapper();
-            Dataset dataset = mapper.readValue(datasetJson, Dataset.class);
-
-            if (dataset.getId() == null || dataset.getId().isEmpty()) {
-                return ResponseEntity.badRequest().body(DatasetResponse.createResponse(
-                        "Fail", HttpStatus.BAD_REQUEST, "Primary key 'id' is required", null));
-            }
-            if (dataset.getDataSchema() == null || dataset.getDataSchema().isEmpty()) {
-                return ResponseEntity.badRequest().body(DatasetResponse.createResponse(
-                        "Fail", HttpStatus.BAD_REQUEST, "Data schema is required", null));
-            }
-            if (dataset.getRouterConfig() == null || dataset.getRouterConfig().isEmpty()) {
-                return ResponseEntity.badRequest().body(DatasetResponse.createResponse(
-                        "Fail", HttpStatus.BAD_REQUEST, "Router config is required", null));
+            Dataset dataset = objectMapper.readValue(datasetJson, Dataset.class);
+            Optional<String> validateError = Validation.validate(dataset);
+            if (validateError.isPresent()) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(DatasetResponse.createResponse("Fail", HttpStatus.BAD_REQUEST, validateError.get(), null));
             }
             if (datasetRepository.existsById(dataset.getId())) {
-               return ResponseEntity.status(HttpStatus.CONFLICT).body(DatasetResponse.createResponse("Fail",HttpStatus.CONFLICT,"Requested id is already existed",null));
+                return ResponseEntity.status(HttpStatus.CONFLICT).body(DatasetResponse.createResponse("Fail", HttpStatus.CONFLICT, "Requested id is already existed", null));
             }
             dataset.setStatus(Status.valueOf("DRAFT"));
-            dataset.setCreatedBy("SYSTEM");
             dataset.setUpdatedBy("SYSTEM");
             dataset.setCreatedByDate(LocalDateTime.now());
             dataset.setUpdatedByDate(LocalDateTime.now());
+
             Dataset savedDataset = datasetRepository.save(dataset);
-
-            SimpleResponse simpleResponse = new SimpleResponse(
-                    savedDataset.getId(),
-                    "Dataset saved successfully with ID: " + savedDataset.getId()
-            );
-            return ResponseEntity.status(HttpStatus.CREATED).body(DatasetResponse.createResponse(
-                    "Success", HttpStatus.CREATED, "null", simpleResponse));
-
-
+            SimpleResponse simpleResponse = new SimpleResponse(savedDataset.getId(),
+                    "Dataset saved successfully with ID: " + savedDataset.getId());
+            return ResponseEntity.status(HttpStatus.CREATED).body(DatasetResponse.createResponse("Success", HttpStatus.CREATED, "null", simpleResponse));
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(DatasetResponse.createResponse(
-                    "Fail", HttpStatus.INTERNAL_SERVER_ERROR, "Error processing request ", null));
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(DatasetResponse.createResponse("Fail", HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), null));
         }
     }
 
-    //UPDATE
-    public ResponseEntity<?> updateDatasetById(String id, Dataset updateDataset) {
+    //updated dataset by id
+     public ResponseEntity<?> updateDatasetById(String id, String updateDataset) {
         try {
             Optional<Dataset> datasetExi = datasetRepository.findById(id);
-            if (!datasetExi.isPresent()) {
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(DatasetResponse.createResponse("Fail", HttpStatus.BAD_REQUEST, "requested dataset id not found ", null));
+            if (datasetExi.isEmpty()) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(DatasetResponse.createResponse("Fail", HttpStatus.NOT_FOUND, "requested dataset id not found ", null));
             }
-
             Dataset existingDataset = datasetExi.get();
-
-            if (updateDataset.getDataSchema() == null || existingDataset.getDataSchema().values().isEmpty()) {
-                return ResponseEntity.badRequest().body(DatasetResponse.createResponse("fail", HttpStatus.BAD_REQUEST, "dataSchema is required", null));
+            Dataset updateData = objectMapper.readValue(updateDataset,Dataset.class);
+            Optional<String> validationError = Validation.validateForUpdate(updateData);
+            if(validationError.isPresent()){
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(DatasetResponse.createResponse("fail",HttpStatus.BAD_REQUEST,validationError.get(),null));
             }
-            if (updateDataset.getRouterConfig() == null || existingDataset.getRouterConfig().values().isEmpty()) {
-                return ResponseEntity.badRequest().body(DatasetResponse.createResponse("fail", HttpStatus.BAD_REQUEST, "routerConfig is required", null));
-            }
-
-            //  existingDataset.setStatus(Status.valueOf("DRAFT"));
-            existingDataset.setCreatedBy("SYSTEM");
             existingDataset.setUpdatedBy("SYSTEM");
-            existingDataset.setCreatedByDate(LocalDateTime.now());
+            existingDataset.setUpdatedByDate(LocalDateTime.now());
 
-            if (updateDataset.getDataSchema() != null) {
-                existingDataset.setDataSchema(updateDataset.getDataSchema());
+            if (updateData.getDataSchema() != null) {
+                existingDataset.setDataSchema(updateData.getDataSchema());
             }
-            if (updateDataset.getRouterConfig() != null) {
-                existingDataset.setRouterConfig(updateDataset.getRouterConfig());
+            if (updateData.getRouterConfig() != null) {
+                existingDataset.setRouterConfig(updateData.getRouterConfig());
             }
-            if (updateDataset.getStatus() != null) {
-                existingDataset.setStatus(updateDataset.getStatus());
+            if (updateData.getStatus() != null) {
+                existingDataset.setStatus(updateData.getStatus());
             }
+
 
             Dataset updateDatasets = datasetRepository.save(existingDataset);
-            SimpleResponse simpleResponse = new SimpleResponse(
-                    existingDataset.getId(),
-                    "Dataset updated successfully with ID: " + existingDataset.getId()
-            );
+            SimpleResponse simpleResponse = new SimpleResponse(existingDataset.getId(),"Dataset updated successfully with ID: " + existingDataset.getId());
             return ResponseEntity.ok().body(DatasetResponse.createResponse("Success", HttpStatus.OK, "null", simpleResponse));
-
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(DatasetResponse.createResponse("fail", HttpStatus.INTERNAL_SERVER_ERROR, "An error occured", null));
+        }catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(DatasetResponse.createResponse("fail", HttpStatus.INTERNAL_SERVER_ERROR, "An error is occured", null));
         }
     }
 
